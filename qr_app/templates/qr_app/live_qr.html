@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="10">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live QR | Organization Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      color: #222;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .card {
+      border: 1.5px solid #444;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 25px;
+      background-color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .card strong {
+      display: inline-block;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .qr-pair {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .qr-block {
+      text-align: center;
+    }
+
+    .qr-block img {
+      margin-top: 10px;
+      border: 1px solid #aaa;
+      padding: 5px;
+      background-color: #fff;
+      border-radius: 5px;
+    }
+
+    .time {
+      font-size: 0.85em;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .timestamp {
+      text-align: right;
+      font-size: 0.85em;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .no-qr {
+      text-align: center;
+      margin-top: 60px;
+      font-size: 1.1em;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h2>📡 Live QR Codes (Check-In & Check-Out)</h2>
+
+  <div class="timestamp">
+    <strong>Current Time:</strong> {{ now|date:"Y-m-d H:i:s" }}
+  </div>
+
+  {% for username, qrs in grouped_qrs.items %}
+    {% if qrs.employee %}
+    <div class="card">
+      <strong>👤 Employee:</strong> {{ qrs.employee.user.username }}<br>
+      <strong>🏢 Department:</strong> {{ qrs.employee.department }}<br>
+
+      <div class="qr-pair">
+        {% if qrs.checkin %}
+        <div class="qr-block">
+          <strong>✅ Check-In</strong><br>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ qrs.checkin.token|urlencode }}" alt="Check-In QR">
+          <div class="time">Expires: {{ qrs.checkin.expires_at|date:"H:i:s" }}</div>
+        </div>
+        {% endif %}
+
+        {% if qrs.checkout %}
+        <div class="qr-block">
+          <strong>📤 Check-Out</strong><br>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ qrs.checkout.token|urlencode }}" alt="Check-Out QR">
+          <div class="time">Expires: {{ qrs.checkout.expires_at|date:"H:i:s" }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  {% empty %}
+    <div class="no-qr">🚫 No active QR codes currently.</div>
+  {% endfor %}
+</body>
+</html>
